@@ -48,7 +48,7 @@ for subreddit in IncludedSubreddits:
     data = Scan.get_subreddit(subreddit)
     print "trying %s for submissions" % subreddit
     if data:
-        for submission in data.get_new(limit=100):
+        for submission in data.get_new(limit=500):
             subject = submission.title.lower()
             has_pandas = any(string in subject for string in Words)
             if has_pandas:
