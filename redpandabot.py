@@ -13,6 +13,10 @@ import logging
 import pprint
 import ast
 
+# to disable the https warning
+import urllib3
+urllib3.disable_warnings()
+
 logging.basicConfig(filename='/var/log/redpandabot.log', format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG)
 Config = ConfigParser.ConfigParser()
 Config.read("./config.ini")
