@@ -11,15 +11,19 @@ import praw
 import ConfigParser
 import logging
 import pprint
+import ast
 
 logging.basicConfig(filename='/var/log/redpandabot.log', format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG)
 Config = ConfigParser.ConfigParser()
 Config.read("./config.ini")
+BotUser = Config.get('Bot','Username')
+BotPassword = Config.get('Bot','Password')
 DBHost = Config.get('DB','Host')
 DBUsername = Config.get('DB','Username')
 DBPassword = Config.get('DB', 'Password')
-IncludedSubreddits = Config.get('Reddit','Included')
+IncludedSubreddits = ast.literal_eval(Config.get('Reddit','Included'))
 ExcludedSubreddits = Config.get('Reddit','Excluded')
+Words = ast.literal_eval(Config.get('Reddit','Terms'))
 
 print "Hello %s you are connecting to %s with password %s" % (DBUsername, DBHost,DBPassword)
 
@@ -38,12 +42,26 @@ Scan = praw.Reddit('RedPandaBot scanning for Red Panda cuteness. https://github.
 # It also neeeds to scan submission titles and texts
 
 print "Checking %s for comments" % (IncludedSubreddits)
-Scan.login('RedPandaBot','DuckCult3%')
-temp = Scan.get_subreddit('aww')
-temp_commments = temp.get_comments()
-#flat_comments = praw.helpers.flatten_tree(temp_commments)
-#print "T"
-flat_comments = praw.helpers.flatten_tree(temp_comments)
-print flat_comments
+Scan.login(BotUser, BotPassword)
 
-
+for subreddit in IncludedSubreddits:
+    data = Scan.get_subreddit(subreddit)
+    print "trying %s for submissions" % subreddit
+    if data:
+        for submission in data.get_new(limit=100):
+            subject = submission.title.lower()
+            has_pandas = any(string in subject for string in Words)
+            if has_pandas:
+                print 'Thread found in %s' % subreddit
+                print ' %s' % submission.title
+                print ' %s' % submission.short_link
+    # now get comments
+    comments = Scan.get_subreddit(subreddit).get_comments()
+    print " trying comments in %s" % subreddit
+    if comments:
+        for comment in comments:
+            has_pandas = any(string in comment.body for string in Words)
+            if has_pandas:
+                print 'Comment found in %s' % subreddit
+                print ' %s ' % comment.permalink
+        
