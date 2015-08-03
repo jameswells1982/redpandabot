@@ -56,11 +56,12 @@ for subreddit in IncludedSubreddits:
                 print ' %s' % submission.title
                 print ' %s' % submission.short_link
     # now get comments
-    comments = Scan.get_subreddit(subreddit).get_comments()
+    comments = Scan.get_subreddit(subreddit).get_comments(limit=None)
     print " trying comments in %s" % subreddit
     if comments:
         for comment in comments:
-            has_pandas = any(string in comment.body for string in Words)
+            message = comment.body.lower()
+            has_pandas = any(string in message for string in Words)
             if has_pandas:
                 print 'Comment found in %s' % subreddit
                 print ' %s ' % comment.permalink
